@@ -1,16 +1,15 @@
 package com.gdl_raccoglietori.model;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import jakarta.persistence.*;
+import jakarta.validation.constraints.NotBlank;
+import lombok.*;
 
 @Entity
 @Data
 @NoArgsConstructor
+@AllArgsConstructor
+@ToString
+@EqualsAndHashCode
 public class Utente 
 {
 	@Id
@@ -18,7 +17,13 @@ public class Utente
 	private Long id;
 	
 	@Column(length = 100)
+	@NotBlank(message = "il nome è obbligatorio")
 	private String nome;
 	
+	@Column(length = 100)
+	@NotBlank(message = "il cognome è obbligatorio")
 	private String cognome;
+	
+	@Column(length = 60)
+	private String password;
 }
