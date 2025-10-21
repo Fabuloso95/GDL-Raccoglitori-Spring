@@ -16,6 +16,7 @@ import lombok.*;
 @AllArgsConstructor
 @ToString
 @EqualsAndHashCode
+@Builder
 public class Utente implements UserDetails
 {
 	private static final long serialVersionUID = 1L;
@@ -50,6 +51,8 @@ public class Utente implements UserDetails
 	private Ruolo ruolo;
 	
 	@Column(nullable = false)
+	@PastOrPresent(message = "la data di registrazione non può essere futura")
+	@Builder.Default
     private LocalDate dataRegistrazione = LocalDate.now();
 	
 	@Column(length = 255)
@@ -59,6 +62,16 @@ public class Utente implements UserDetails
 
     @Column(length = 500)
     private String refreshToken;
+    
+    @Column(nullable = false)
+    @Builder.Default
+    private boolean attivo = true;
+
+    @Column(length = 20)
+    private String provider;
+
+    @Column(length = 100)
+    private String providerId;
 
 	@Override
 	public Collection<? extends GrantedAuthority> getAuthorities() 
@@ -71,4 +84,10 @@ public class Utente implements UserDetails
 	{
 		return username;
 	}
+	
+	@Override
+    public boolean isEnabled() 
+    {
+        return this.attivo;
+    }
 }
