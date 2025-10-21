@@ -27,7 +27,6 @@ public class Utente implements UserDetails
 	
 	@NotBlank(message = "l'username è obbligatorio")
 	@Column(unique = true, nullable = false)
-	@Min(value = 8, message = "l'username deve avere almeno 8 caratteri")
 	private String username;
 	
 	@Column(length = 100, nullable = false)
@@ -72,6 +71,34 @@ public class Utente implements UserDetails
 
     @Column(length = 100)
     private String providerId;
+    
+    @OneToMany(mappedBy = "mittente", cascade = CascadeType.ALL, orphanRemoval = true)
+    @Column(name = "messaggi_inviati")
+    private Set<MessaggioChat> messaggiInviati;
+    
+    @OneToMany(mappedBy = "destinatario", cascade = CascadeType.ALL, orphanRemoval = true)
+    @Column(name = "messaggi_ricevuti")
+    private Set<MessaggioChat> messaggiRicevuti;
+    
+    @OneToMany(mappedBy = "utente", cascade = CascadeType.ALL, orphanRemoval = true)
+    @Column(name = "letture_correnti")
+    private Set<LetturaCorrente> lettureCorrenti;
+
+    @OneToMany(mappedBy = "utente", cascade = CascadeType.ALL, orphanRemoval = true)
+    @Column(name = "voti_utente")
+    private Set<VotoUtente> votiUtente;
+
+    @OneToMany(mappedBy = "utente", cascade = CascadeType.ALL, orphanRemoval = true)
+    @Column(name = "commenti_pagina")
+    private Set<CommentoPagina> commentiPagina;
+    
+    @OneToMany(mappedBy = "utenteCreatore", cascade = CascadeType.ALL, orphanRemoval = true)
+    @Column(name = "curiosita_create")
+    private Set<Curiosita> curiositaCreate;
+    
+    @OneToMany(mappedBy = "utente", cascade = CascadeType.ALL, orphanRemoval = true)
+    @Column(name = "frasi_preferite")
+    private Set<FrasePreferita> frasiPreferite;
 
 	@Override
 	public Collection<? extends GrantedAuthority> getAuthorities() 
