@@ -1,0 +1,18 @@
+package com.gdl_raccoglietori.dto.response;
+
+import lombok.Builder;
+import lombok.Data;
+
+@Data
+@Builder
+public class LibroResponse
+{
+	private Long Id;
+	private String titolo;
+	private String autore;
+	private String copertinaUrl;
+	private String sinossi;
+	private Integer annoPubblicazione;
+	private Integer numeroPagine;
+	private Boolean letto;
+}
