@@ -19,4 +19,6 @@ public class Utente
 	
 	@Column(length = 100)
 	private String nome;
+	
+	private String cognome;
 }
