@@ -1,6 +1,5 @@
 package com.gdl_raccoglietori.dto.response;
 
-import com.gdl_raccoglietori.model.*;
 import lombok.*;
 
 @Data
@@ -8,9 +7,9 @@ import lombok.*;
 public class CuriositaResponse 
 {
 	private Long id;
-	private Libro libro;
+	private LibroResponse libro;
 	private String titolo;
 	private String contenuto;
 	private Integer paginaRiferimento;
-	private Utente utenteCreatore;
+	private UtenteResponse utenteCreatore;
 }

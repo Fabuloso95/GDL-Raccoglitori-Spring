@@ -1,7 +1,6 @@
 package com.gdl_raccoglietori.dto.response;
 
 import java.time.LocalDate;
-import com.gdl_raccoglietori.model.Ruolo;
 import lombok.*;
 
 @Data
@@ -13,7 +12,7 @@ public class UtenteResponse
 	private String email;
 	private String nome;
 	private String cognome;
-	private Ruolo ruolo;
+	private RuoloDTO ruolo;
 	private LocalDate dataRegistrazione;
 	private Boolean attivo;
 }

@@ -9,7 +9,7 @@ import lombok.*;
 public class CommentoPaginaResponse 
 {
 	private Long id;
-	private Utente utente;
+	private UtenteResponse utente;
 	private LetturaCorrente letturaCorrente;
 	private Integer paginaRiferimento;
 	private String contenuto;

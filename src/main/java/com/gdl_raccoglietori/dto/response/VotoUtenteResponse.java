@@ -1,7 +1,6 @@
 package com.gdl_raccoglietori.dto.response;
 
 import java.time.*;
-import com.gdl_raccoglietori.model.*;
 import lombok.*;
 
 @Data
@@ -9,7 +8,7 @@ import lombok.*;
 public class VotoUtenteResponse 
 {
 	    private Long id;
-		private Utente utente;
-		private PropostaVoto propostaVoto;
+		private UtenteResponse utente;
+		private PropostaVotoResponse propostaVoto;
 		private YearMonth meseVotazione;
 }
