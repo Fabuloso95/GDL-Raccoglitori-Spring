@@ -7,9 +7,9 @@ import lombok.*;
 public class CuriositaResponse 
 {
 	private Long id;
-	private LibroResponse libro;
+	private Long libroId;
 	private String titolo;
 	private String contenuto;
 	private Integer paginaRiferimento;
-	private UtenteResponse utenteCreatore;
+	private AutoreCommentoResponse utenteCreatore;
 }

@@ -1,7 +1,7 @@
 package com.gdl_raccoglietori.dto.response;
 
 import java.time.LocalDate;
-import java.util.Set;
+import java.util.List;
 import lombok.*;
 
 @Data
@@ -9,11 +9,11 @@ import lombok.*;
 public class LetturaCorrenteResponse
 {
 	private Long id;
-	private UtenteResponse utente;
-	private LibroResponse libro;
+	private Long utenteId;
+	private Long libroId;
 	private Integer paginaCorrente;
 	private LocalDate dataInizio;
 	private LocalDate dataCompletamento;
 	private Boolean partecipaChiamataZoom;
-	private Set<CommentoPaginaResponse> commentiPagina;
+	private List<CommentoPaginaResponse> commentiPagina;
 }

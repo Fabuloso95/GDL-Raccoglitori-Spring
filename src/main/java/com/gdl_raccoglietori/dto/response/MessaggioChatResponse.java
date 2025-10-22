@@ -9,8 +9,8 @@ import lombok.*;
 public class MessaggioChatResponse 
 {
 	private Long id;
-	private UtenteResponse mittente;
-	private UtenteResponse destinatario;
+	private AutoreCommentoResponse mittente;
+	private AutoreCommentoResponse destinatario;
 	private UUID gruppoID;
 	private String tipoChat;
 	private String contenuto;

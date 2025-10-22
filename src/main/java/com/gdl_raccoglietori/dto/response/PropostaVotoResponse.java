@@ -1,7 +1,6 @@
 package com.gdl_raccoglietori.dto.response;
 
 import java.time.*;
-import java.util.Set;
 import lombok.*;
 
 @Data
@@ -9,9 +8,8 @@ import lombok.*;
 public class PropostaVotoResponse 
 {
 	private Long id;
-	private LibroResponse libroProposto;
+	private LibroResponse libroProposto; 
 	private YearMonth meseVotazione;
 	private LocalDateTime dataCreazione;
 	private Integer numVoti;
-    private Set<VotoUtenteResponse> votiRicevuti;
 }

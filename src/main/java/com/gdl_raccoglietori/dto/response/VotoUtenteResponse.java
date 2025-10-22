@@ -8,7 +8,7 @@ import lombok.*;
 public class VotoUtenteResponse 
 {
 	    private Long id;
-		private UtenteResponse utente;
-		private PropostaVotoResponse propostaVoto;
+	    private Long utenteId;
+		private Long propostaVotoId;
 		private YearMonth meseVotazione;
 }

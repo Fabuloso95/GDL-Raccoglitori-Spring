@@ -1,7 +1,6 @@
 package com.gdl_raccoglietori.dto.response;
 
 import java.time.LocalDateTime;
-import com.gdl_raccoglietori.model.*;
 import lombok.*;
 
 @Data
@@ -10,7 +9,7 @@ public class CommentoPaginaResponse
 {
 	private Long id;
 	private UtenteResponse utente;
-	private LetturaCorrente letturaCorrente;
+	private Long letturaCorrenteId;
 	private Integer paginaRiferimento;
 	private String contenuto;
 	private LocalDateTime dataCreazione;
