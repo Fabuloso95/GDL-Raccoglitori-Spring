@@ -1,5 +1,15 @@
 package com.gdl_raccoglietori.dto.response;
 
-public class VotoUtenteResponse {
+import java.time.*;
+import com.gdl_raccoglietori.model.*;
+import lombok.*;
 
+@Data
+@Builder
+public class VotoUtenteResponse 
+{
+	    private Long id;
+		private Utente utente;
+		private PropostaVoto propostaVoto;
+		private YearMonth meseVotazione;
 }

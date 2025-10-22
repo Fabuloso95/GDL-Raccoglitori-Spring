@@ -64,7 +64,7 @@ public class Utente implements UserDetails
     
     @Column(nullable = false)
     @Builder.Default
-    private boolean attivo = true;
+    private Boolean attivo = true;
 
     @Column(length = 20)
     private String provider;
