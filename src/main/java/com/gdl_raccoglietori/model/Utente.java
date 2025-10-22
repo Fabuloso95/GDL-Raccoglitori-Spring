@@ -1,7 +1,6 @@
 package com.gdl_raccoglietori.model;
 
-import java.time.LocalDate;
-import java.time.LocalDateTime;
+import java.time.*;
 import java.util.*;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -73,31 +72,24 @@ public class Utente implements UserDetails
     private String providerId;
     
     @OneToMany(mappedBy = "mittente", cascade = CascadeType.ALL, orphanRemoval = true)
-    @Column(name = "messaggi_inviati")
     private Set<MessaggioChat> messaggiInviati;
     
     @OneToMany(mappedBy = "destinatario", cascade = CascadeType.ALL, orphanRemoval = true)
-    @Column(name = "messaggi_ricevuti")
     private Set<MessaggioChat> messaggiRicevuti;
     
     @OneToMany(mappedBy = "utente", cascade = CascadeType.ALL, orphanRemoval = true)
-    @Column(name = "letture_correnti")
     private Set<LetturaCorrente> lettureCorrenti;
 
     @OneToMany(mappedBy = "utente", cascade = CascadeType.ALL, orphanRemoval = true)
-    @Column(name = "voti_utente")
     private Set<VotoUtente> votiUtente;
 
     @OneToMany(mappedBy = "utente", cascade = CascadeType.ALL, orphanRemoval = true)
-    @Column(name = "commenti_pagina")
     private Set<CommentoPagina> commentiPagina;
     
     @OneToMany(mappedBy = "utenteCreatore", cascade = CascadeType.ALL, orphanRemoval = true)
-    @Column(name = "curiosita_create")
     private Set<Curiosita> curiositaCreate;
     
     @OneToMany(mappedBy = "utente", cascade = CascadeType.ALL, orphanRemoval = true)
-    @Column(name = "frasi_preferite")
     private Set<FrasePreferita> frasiPreferite;
 
 	@Override
