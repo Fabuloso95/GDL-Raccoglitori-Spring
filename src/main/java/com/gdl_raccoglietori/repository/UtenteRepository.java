@@ -21,4 +21,5 @@ public interface UtenteRepository extends JpaRepository<Utente, Long>
 	public List<Utente> findByRuolo(Ruolo ruolo);
 	public Optional<Utente> findUtenteByEmail(String email);
 	Optional<Utente> findByUsernameOrEmail(String username, String email);
+	Optional<Utente> findByRefreshToken(String refreshToken); 
 }

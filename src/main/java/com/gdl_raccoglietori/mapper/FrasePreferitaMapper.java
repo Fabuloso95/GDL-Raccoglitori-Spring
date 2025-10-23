@@ -1,6 +1,7 @@
 package com.gdl_raccoglietori.mapper;
 
 import org.mapstruct.*;
+import com.gdl_raccoglietori.dto.request.FrasePreferitaRequest;
 import com.gdl_raccoglietori.dto.response.FrasePreferitaResponse;
 import com.gdl_raccoglietori.model.*;
 
@@ -14,7 +15,7 @@ public interface FrasePreferitaMapper
 	@Mapping(target = "id", ignore = true)
 	@Mapping(source = "libroId", target = "libro")
 	@Mapping(source = "utenteId", target = "utente")
-	FrasePreferita toEntity(FrasePreferitaResponse frasePreferitaResponse);
+	FrasePreferita toEntity(FrasePreferitaRequest request);
 	
 	default Libro toLibro(Long id)
 	{

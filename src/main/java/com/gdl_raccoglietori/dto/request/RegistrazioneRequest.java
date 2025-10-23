@@ -12,7 +12,7 @@ public class RegistrazioneRequest
 	
 	@Email(message = "formato email non valido")
 	@NotBlank(message = "l'email è obbligatoria")
-	private String Email;
+	private String email;
 	
 	@NotBlank(message = "La Password è obbligatoria")
     @Size(min = 8, message = "La password deve essere lunga almeno 8 caratteri")

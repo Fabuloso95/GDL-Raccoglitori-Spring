@@ -16,4 +16,11 @@ public interface LibroMapper
 	@Mapping(target = "lettureCorrenti", ignore = true)
 	@Mapping(target = "curiosita", ignore = true)
 	Libro toEntity(LibroRequest libroRequest);
+	
+	@Mapping(target = "id", ignore = true)
+    @Mapping(target = "letto", ignore = true)
+    @Mapping(target = "proposteVoto", ignore = true)
+    @Mapping(target = "lettureCorrenti", ignore = true)
+    @Mapping(target = "curiosita", ignore = true)
+    void updateLibroFromRequest(LibroRequest request, @MappingTarget Libro libro);
 }
