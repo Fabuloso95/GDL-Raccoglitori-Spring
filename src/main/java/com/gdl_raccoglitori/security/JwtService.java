@@ -5,6 +5,7 @@ import java.time.*;
 import java.util.*;
 import java.util.function.Function;
 import javax.crypto.SecretKey;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.userdetails.UserDetails;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
@@ -14,6 +15,7 @@ import com.gdl_raccoglitori.model.*;
 @Service
 public class JwtService
 {
+	@Value("${jwt.secret}")
 	private String secretKey;
 
     private final long ACCESS_TOKEN_EXPIRATION = 3600000;

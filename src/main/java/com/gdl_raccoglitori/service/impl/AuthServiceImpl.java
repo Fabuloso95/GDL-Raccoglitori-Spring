@@ -1,7 +1,7 @@
 package com.gdl_raccoglitori.service.impl;
 
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.userdetails.*;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -19,20 +19,21 @@ import java.time.LocalDate;
 
 @Service
 @Slf4j
-public class AuthServiceImpl implements AuthService, UserDetailsService
+public class AuthServiceImpl implements AuthService
 {
     private final UtenteRepository utenteRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
     private final AuthenticationManager authenticationManager;
+    private final CustomUserDetailsService userDetailsService;
 
-    // L'uso di @Lazy è necessario su AuthenticationManager per prevenire dipendenze circolari
-    public AuthServiceImpl(UtenteRepository utenteRepository, PasswordEncoder passwordEncoder, JwtService jwtService, @Lazy AuthenticationManager authenticationManager)
+    public AuthServiceImpl(UtenteRepository utenteRepository, PasswordEncoder passwordEncoder, JwtService jwtService, @Lazy AuthenticationManager authenticationManager, CustomUserDetailsService userDetailsService)
     {
         this.utenteRepository = utenteRepository;
         this.passwordEncoder = passwordEncoder;
         this.jwtService = jwtService;
         this.authenticationManager = authenticationManager;
+        this.userDetailsService = userDetailsService;
     }
 
     private RuoloDTO mapRuoloToDTO(Ruolo ruolo) 
@@ -91,14 +92,12 @@ public class AuthServiceImpl implements AuthService, UserDetailsService
             .build();
     }
 
-    /**
-     * Esegue l'accesso autenticando l'utente tramite username O email.
-     * Genera e persiste il refresh token nel DB.
-     */
     @Override
     @Transactional
     public AuthResponse login(LoginRequest loginDTO)
     {
+        userDetailsService.loadUserByUsername(loginDTO.getUsernameOrEmail());
+
         authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(loginDTO.getUsernameOrEmail(), loginDTO.getPassword()));
 
         Utente utente = utenteRepository.findByUsernameOrEmail(loginDTO.getUsernameOrEmail(), loginDTO.getUsernameOrEmail()) 
@@ -119,30 +118,46 @@ public class AuthServiceImpl implements AuthService, UserDetailsService
         return authResponse;
     }
 
-    /**
-     * Genera un nuovo Access Token usando un Refresh Token valido.
-     */
     @Override
     @Transactional
     public AuthResponse refreshToken(String refreshToken)
     {
-        final String username = jwtService.extractUsername(refreshToken);
+        if (refreshToken == null || refreshToken.trim().isEmpty()) 
+        {
+            throw new IllegalArgumentException("Refresh token non fornito");
+        }
+
+        final String username;
+        try 
+        {
+            username = jwtService.extractUsername(refreshToken);
+        } 
+        catch (Exception e) 
+        {
+            throw new IllegalArgumentException("Refresh token non valido");
+        }
+        
         if (username == null)
         {
-            throw new RuntimeException("Refresh token non valido o scaduto (impossibile estrarre username).");
+            throw new IllegalArgumentException("Refresh token non valido o scaduto");
         }
 
         Utente utente = utenteRepository.findByUsername(username)
-                .orElseThrow(() -> new RuntimeException("Utente non trovato associato al token."));
+                .orElseThrow(() -> new IllegalArgumentException("Utente non trovato associato al token"));
 
-        if (jwtService.isTokenExpired(refreshToken) || utente.getRefreshToken() == null || !refreshToken.equals(utente.getRefreshToken()))
+        if (jwtService.isTokenExpired(refreshToken)) 
+        {
+            throw new IllegalArgumentException("Refresh token scaduto");
+        }
+
+        if (utente.getRefreshToken() == null || !refreshToken.equals(utente.getRefreshToken()))
         {
             if (utente.getRefreshToken() != null) 
             {
                 utente.setRefreshToken(null);
                 utenteRepository.save(utente);
             }
-            throw new RuntimeException("Refresh token non valido o scaduto.");
+            throw new IllegalArgumentException("Refresh token non valido");
         }
 
         String newAccessToken = jwtService.generateToken(utente);
@@ -160,9 +175,6 @@ public class AuthServiceImpl implements AuthService, UserDetailsService
         return response;
     }
     
-    /**
-     * Invalida il Refresh Token disconnettendo l'utente (rimuovendolo dal DB).
-     */
     @Override
     @Transactional
     public void logout(String refreshToken)
@@ -174,23 +186,6 @@ public class AuthServiceImpl implements AuthService, UserDetailsService
         utenteRepository.save(utente);
     }
 
-    /**
-     * Implementazione di UserDetailsService: Carica i dettagli dell'utente per Spring Security.
-     * Gestisce l'autenticazione tramite username O email.
-     */
-    @Override
-    @Transactional(readOnly = true)
-    public UserDetails loadUserByUsername(String usernameOrEmail) throws UsernameNotFoundException
-    {
-        Utente utente = utenteRepository.findByUsernameOrEmail(usernameOrEmail, usernameOrEmail) 
-                .orElseThrow(() -> new UsernameNotFoundException("Utente non trovato con username o email: " + usernameOrEmail));
-        
-        return new CustomUserDetails(utente);
-    }
-
-    /**
-     * Recupera i dettagli completi dell'utente autenticato (UtenteResponse).
-     */
     @Override
     @Transactional(readOnly = true)
     public UtenteResponse getCurrentUserDetails(Authentication authentication) 

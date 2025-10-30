@@ -10,28 +10,27 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
-import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.*;
 import com.gdl_raccoglitori.service.impl.CustomOAuth2UserService;
+import com.gdl_raccoglitori.service.impl.CustomUserDetailsService;
 
 @Configuration
 @EnableWebSecurity
 @EnableMethodSecurity
 public class SecurityConfig 
 {
-	@Bean
-    JwtAuthenticationFilter jwtAuthenticationFilter(JwtService jwtService, UserDetailsService userDetailsService)
-    {
-        return new JwtAuthenticationFilter(jwtService, userDetailsService);
+    private final CustomUserDetailsService userDetailsService;
+    
+    public SecurityConfig(CustomUserDetailsService userDetailsService) {
+        this.userDetailsService = userDetailsService;
     }
-
+    
     @Bean
-    JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint() 
-    {
+    JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint() {
         return new JwtAuthenticationEntryPoint();
     }
     
@@ -42,8 +41,7 @@ public class SecurityConfig
             JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint,
             CustomOAuth2UserService customOAuth2UserService,
             OAuth2AuthenticationSuccessHandler oAuth2AuthenticationSuccessHandler
-    ) throws Exception
-    {
+    ) throws Exception {
         http
             .csrf(AbstractHttpConfigurer::disable)
             .cors(cors -> cors.configurationSource(corsConfigurationSource()))
@@ -53,49 +51,12 @@ public class SecurityConfig
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                 
-                // --- Rotte Pubbliche (PermitAll) ---
-                // Autenticazione & OAuth
-                .requestMatchers("/auth/**").permitAll()
-                .requestMatchers("/api/auth/**").permitAll()
-                .requestMatchers("/oauth2/**").permitAll()
-                .requestMatchers("/login/oauth2/**").permitAll()
+                // Rotte Pubbliche
+                .requestMatchers("/auth/**", "/api/auth/**", "/oauth2/**", 
+                               "/login/oauth2/**", "/api/utenti/password/**").permitAll()
+                .requestMatchers(HttpMethod.GET, "/api/libri", "/api/libri/{id}").permitAll()
                 
-                // Gestione Password
-                .requestMatchers("/api/utenti/password/dimenticata").permitAll() 
-                .requestMatchers("/api/utenti/password/reset").permitAll()
-                
-                // Consultazione Libri (Catalogo)
-                .requestMatchers(HttpMethod.GET, "/api/libri").permitAll()
-                .requestMatchers(HttpMethod.GET, "/api/libri/{id}").permitAll()
-                
-                // --- Rotte che Richiedono Autenticazione (Authenticated) ---
-                // Le altre rotte dei Libri (POST, PUT, DELETE)
-                .requestMatchers("/api/libri/**").authenticated() 
-                
-                // Utenti (CRUD, attivazione, ruolo, ecc.)
-                .requestMatchers("/api/utenti/**").authenticated() 
-                
-                // Letture
-                .requestMatchers("/api/letture/**").authenticated() 
-                
-                // Commenti
-                .requestMatchers("/api/commenti/**").authenticated()
-                
-                // Curiosità
-                .requestMatchers("/api/curiosita/**").authenticated()
-                
-                // Frasi Preferite
-                .requestMatchers("/api/frasi-preferite/**").authenticated()
-                
-                // Chat
-                .requestMatchers("/api/chat/**").authenticated()
-                
-                // Proposte e Voti
-                // Include: /api/proposte/** e /api/voti/** (anche il nuovo VotoUtenteController)
-                .requestMatchers("/api/proposte/**").authenticated()
-                .requestMatchers("/api/voti/**").authenticated()
-                
-                // Qualsiasi altra richiesta che non è stata coperta richiede autenticazione
+                // Tutte le altre richiedono autenticazione
                 .anyRequest().authenticated())
                 
             .sessionManagement(sess -> sess.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
@@ -108,10 +69,9 @@ public class SecurityConfig
 
         return http.build();
     }
-	
-	@Bean
-    CorsConfigurationSource corsConfigurationSource()
-    {
+    
+    @Bean
+    CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
         configuration.setAllowedOrigins(List.of("http://localhost:4200"));
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"));
@@ -123,14 +83,12 @@ public class SecurityConfig
     }
 
     @Bean
-    PasswordEncoder passwordEncoder()
-    {
+    PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
-
+    
     @Bean
-    AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception
-    {
+    AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception {
         return config.getAuthenticationManager();
     }
 }
