@@ -33,3 +33,4 @@ build/
 .vscode/
 
 echo "application-private.properties" >> .gitignore
+application-private.properties
