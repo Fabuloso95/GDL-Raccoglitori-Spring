@@ -4,10 +4,8 @@ import java.time.LocalDate;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.context.annotation.*;
 import org.springframework.security.crypto.password.PasswordEncoder;
-
 import com.gdl_raccoglitori.model.*;
 import com.gdl_raccoglitori.repository.UtenteRepository;
-
 import lombok.RequiredArgsConstructor;
 
 @Configuration
