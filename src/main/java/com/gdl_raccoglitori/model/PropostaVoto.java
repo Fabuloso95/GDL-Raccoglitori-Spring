@@ -23,7 +23,7 @@ public class PropostaVoto
 	private Libro libroProposto;
 	
 	@Column(nullable = false, name = "mese_votazione", columnDefinition = "TEXT")
-	private YearMonth meseVotazione;
+	private String meseVotazione;
 	
 	@Column(nullable = false, name = "data_creazione")
 	@PastOrPresent(message = "La data di creazione non può essere futura")

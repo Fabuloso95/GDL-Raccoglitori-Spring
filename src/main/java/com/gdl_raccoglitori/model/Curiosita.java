@@ -1,5 +1,6 @@
 package com.gdl_raccoglitori.model;
 
+import java.util.Objects;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import lombok.*;
@@ -8,8 +9,6 @@ import lombok.*;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-@ToString
-@EqualsAndHashCode
 public class Curiosita 
 {
 	@Id
@@ -28,11 +27,31 @@ public class Curiosita
 	@NotBlank(message = "Il contenuto è obbligatorio")
 	private String contenuto;
 	
-	// Riferimento opzionale alla pagina, non obbligatorio in questo contesto
 	@Column(name = "pagina_di_riferimento")
 	private Integer paginaRiferimento;
 	
-	@ManyToOne(fetch = FetchType.LAZY)
+	@ManyToOne(fetch = FetchType.EAGER)
 	@JoinColumn(name = "utente_creatore_id", nullable = false)
 	private Utente utenteCreatore;
+	
+	@Override
+    public int hashCode() 
+	{
+        return Objects.hash(id);
+    }
+
+    @Override
+    public boolean equals(Object obj)
+    {
+        if (this == obj) return true;
+        if (obj == null || getClass() != obj.getClass()) return false;
+        Curiosita other = (Curiosita) obj;
+        return Objects.equals(id, other.id);
+    }
+    
+    @Override
+    public String toString()
+    {
+        return "Curiosita [id=" + id + ", titolo=" + titolo + "]";
+    }
 }

@@ -68,11 +68,13 @@ public class JwtService
 
     public <T> T extractClaim(String token, Function<Claims, T> claimsResolver)
     {
-        try {
+        try 
+        {
             final Claims claims = extractAllClaims(token);
             return claimsResolver.apply(claims);
-        } catch (Exception e) {
-            // Log l'errore per debug, ma restituisci null/gestisci l'errore
+        } 
+        catch (Exception e) 
+        {
             return null; 
         }
     }

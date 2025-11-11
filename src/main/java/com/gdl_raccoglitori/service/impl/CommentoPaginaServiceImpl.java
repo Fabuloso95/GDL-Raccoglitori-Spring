@@ -79,7 +79,7 @@ public class CommentoPaginaServiceImpl implements CommentoPaginaService
     @Override
     public CommentoPagina findById(Long id) 
     {
-        return commentoPaginaRepository.findById(id)
+        return commentoPaginaRepository.findByIdWithUtente(id)
                 .orElseThrow(() -> new RisorsaNonTrovataException("CommentoPagina con ID " + id + " non trovato."));
     }
 

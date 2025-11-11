@@ -2,6 +2,8 @@ package com.gdl_raccoglitori.service.impl;
 
 import java.util.List;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import com.gdl_raccoglitori.dto.request.CuriositaRequest;
 import com.gdl_raccoglitori.exceptionhandler.exception.*;
 import com.gdl_raccoglitori.model.*;
@@ -83,6 +85,7 @@ public class CuriositaServiceImpl implements CuriositaService
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<Curiosita> findByLibroId(Long libroId) 
     {
         Libro libro = libroRepository.findById(libroId)
@@ -92,6 +95,7 @@ public class CuriositaServiceImpl implements CuriositaService
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<Curiosita> findByLibroAndPagina(Long libroId, Integer paginaRiferimento) 
     {
         Libro libro = libroRepository.findById(libroId)

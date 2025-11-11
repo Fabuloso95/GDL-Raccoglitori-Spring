@@ -11,8 +11,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
-import java.time.YearMonth;
-import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 @Service
@@ -24,14 +22,14 @@ public class PropostaVotoServiceImpl implements PropostaVotoService
     private final LibroRepository libroRepository;
     private final VotoUtenteRepository votoUtenteRepository;
     private final PropostaVotoMapper propostaVotoMapper;
-    private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM");
+    private static final int MAX_VOTI_PER_MESE = 3;
 
     @Override
     public PropostaVoto createProposta(PropostaVotoRequest request) 
     {
-        YearMonth meseVotazione = propostaVotoMapper.stringToYearMonth(request.getMeseVotazione());
+        String meseVotazione = request.getMeseVotazione();
         
-        libroRepository.findById(request.getLibroId())
+        Libro libro = libroRepository.findById(request.getLibroId())
                 .orElseThrow(() -> new RisorsaNonTrovataException("Libro con ID " + request.getLibroId() + " non trovato."));
 
         List<PropostaVoto> existingProposte = propostaVotoRepository.findByMeseVotazione(meseVotazione);
@@ -40,35 +38,78 @@ public class PropostaVotoServiceImpl implements PropostaVotoService
 
         if (alreadyProposed)
         {
-            throw new ConflittoDatiException("Il libro è già stato proposto per la votazione di " + meseVotazione.format(FORMATTER));
+            throw new ConflittoDatiException("Il libro è già stato proposto per la votazione di " + meseVotazione);
         }
 
         PropostaVoto proposta = propostaVotoMapper.toEntity(request);
+        proposta.setLibroProposto(libro);
         proposta.setDataCreazione(LocalDateTime.now());
         proposta.setNumVoti(0);
+        proposta.setMeseVotazione(meseVotazione); 
         
-        log.info("Creata nuova proposta per il libro ID {} per il mese {}", request.getLibroId(), meseVotazione.format(FORMATTER));
+        log.info("Creata nuova proposta per il libro ID {} per il mese {}", request.getLibroId(), meseVotazione);
 
         return propostaVotoRepository.save(proposta);
     }
-
+    
     @Override
-    public PropostaVoto findWinnerProposta(YearMonth meseVotazione) 
+    public PropostaVoto updateProposta(Long propostaId, PropostaVotoRequest request, Utente utenteCreatore) 
     {
-        log.debug("Ricerca proposta vincente per il mese {}", meseVotazione.format(FORMATTER));
+        PropostaVoto proposta = findById(propostaId);
+
+        Libro nuovoLibro = libroRepository.findById(request.getLibroId())
+                .orElseThrow(() -> new RisorsaNonTrovataException("Libro con ID " + request.getLibroId() + " non trovato."));
+        
+        String nuovoMese = request.getMeseVotazione();
+        
+        if (!proposta.getMeseVotazione().equals(nuovoMese) || !proposta.getLibroProposto().getId().equals(request.getLibroId())) 
+        {
+            
+            List<PropostaVoto> existingProposte = propostaVotoRepository.findByMeseVotazione(nuovoMese);
+            boolean isDuplicate = existingProposte.stream()
+                .filter(p -> !p.getId().equals(propostaId)) 
+                .anyMatch(p -> p.getLibroProposto().getId().equals(request.getLibroId()));
+
+            if (isDuplicate)
+            {
+                 throw new ConflittoDatiException("Il libro è già stato proposto per la votazione di " + nuovoMese);
+            }
+        }
+        
+        proposta.setLibroProposto(nuovoLibro);
+        proposta.setMeseVotazione(nuovoMese);
+        
+        log.info("Proposta ID {} aggiornata per il libro ID {} per il mese {}", propostaId, request.getLibroId(), nuovoMese);
+        return propostaVotoRepository.save(proposta);
+    }
+    
+    @Override
+    @Transactional
+    public void deleteProposta(Long propostaId) 
+    {
+        PropostaVoto proposta = findById(propostaId);
+        
+        propostaVotoRepository.delete(proposta);
+        log.warn("Proposta ID {} eliminata con successo.", propostaId);
+    }
+    
+    @Override
+    public PropostaVoto findWinnerProposta(String meseVotazione) 
+    {
+        log.debug("Ricerca proposta vincente per il mese {}", meseVotazione);
         
         PropostaVoto winner = propostaVotoRepository.findTopPropostaByMeseVotazione(meseVotazione);
         
         if (winner == null)
         {
-             throw new RisorsaNonTrovataException("Nessuna proposta trovata per il mese " + meseVotazione.format(FORMATTER));
+             throw new RisorsaNonTrovataException("Nessuna proposta trovata per il mese " + meseVotazione);
         }
         
         return winner;
     }
 
     @Override
-    public List<PropostaVoto> findByMeseVotazione(YearMonth meseVotazione) 
+    public List<PropostaVoto> findByMeseVotazione(String meseVotazione) 
     {
         return propostaVotoRepository.findByMeseVotazione(meseVotazione);
     }
@@ -85,42 +126,43 @@ public class PropostaVotoServiceImpl implements PropostaVotoService
     public VotoUtente registeVoto(Long propostaVotoId, Utente utente, String meseVotazioneStr) 
     {
         PropostaVoto proposta = findById(propostaVotoId);
-        YearMonth meseVotazioneProposta = proposta.getMeseVotazione();
+        String meseVotazioneProposta = proposta.getMeseVotazione(); 
         
-        YearMonth meseRichiesto;
-        try 
-        {
-            meseRichiesto = YearMonth.parse(meseVotazioneStr, FORMATTER);
-        } 
-        catch (Exception e) 
-        {
-            throw new IllegalArgumentException("Formato mese/anno ('" + meseVotazioneStr + "') non valido. Usa YYYY-MM.");
-        }
 
-        if (!meseVotazioneProposta.equals(meseRichiesto))
+        if (!meseVotazioneProposta.equals(meseVotazioneStr))
         {
             throw new ConflittoDatiException(
-                "La proposta ID " + propostaVotoId + " è per il mese " + meseVotazioneProposta.format(FORMATTER) + 
-                ", ma il voto è richiesto per " + meseRichiesto.format(FORMATTER) + ". Il voto non è coerente."
+                "La proposta ID " + propostaVotoId + " è per il mese " + meseVotazioneProposta + 
+                ", ma il voto è richiesto per " + meseVotazioneStr + ". Il voto non è coerente."
             );
         }
-
-        if (votoUtenteRepository.findByUtenteAndMeseVotazione(utente, meseRichiesto).isPresent()) 
+        
+        if (votoUtenteRepository.findByUtenteAndPropostaVoto(utente, proposta).isPresent())
         {
-            throw new ConflittoDatiException("L'utente ID " + utente.getId() + " ha già espresso un voto per la votazione di " + meseVotazioneStr);
+            throw new ConflittoDatiException("L'utente ID " + utente.getId() + " ha già votato per questa specifica proposta (ID " + propostaVotoId + ").");
+        }
+
+        List<VotoUtente> votiEsistentiNelMese = votoUtenteRepository.findByUtenteAndMeseVotazione(utente, meseVotazioneStr);
+        
+        if (votiEsistentiNelMese.size() >= MAX_VOTI_PER_MESE) 
+        {
+            throw new LimiteSuperatoException(
+                "Hai raggiunto il limite massimo di " + MAX_VOTI_PER_MESE + 
+                " voti per la votazione di " + meseVotazioneStr + " e non puoi votare per nuove proposte."
+            );
         }
 
         VotoUtente voto = new VotoUtente();
         voto.setUtente(utente);
         voto.setPropostaVoto(proposta);
-        voto.setMeseVotazione(meseRichiesto); 
+        voto.setMeseVotazione(meseVotazioneStr); 
         VotoUtente savedVoto = votoUtenteRepository.save(voto);
 
         proposta.setNumVoti(proposta.getNumVoti() + 1);
         propostaVotoRepository.save(proposta);
         
-        log.info("Voto registrato per l'utente ID {} sulla proposta ID {} per il mese {}", 
-                 utente.getId(), propostaVotoId, meseVotazioneStr);
+        log.info("Voto registrato per l'utente ID {} sulla proposta ID {} per il mese {}. Voti totali nel mese per l'utente: {}", 
+                 utente.getId(), propostaVotoId, meseVotazioneStr, votiEsistentiNelMese.size() + 1);
 
         return savedVoto;
     }

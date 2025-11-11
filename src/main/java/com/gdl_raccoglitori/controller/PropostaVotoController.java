@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api")
+@RequestMapping("/api/proposte")
 @RequiredArgsConstructor
 @Validated
 @Slf4j
@@ -20,16 +20,32 @@ public class PropostaVotoController
 {
     private final PropostaVotoFacade propostaVotoFacade;
 
-    @PostMapping("/proposte")
+    @PostMapping
     public ResponseEntity<PropostaVotoResponse> createProposta(@Valid @RequestBody PropostaVotoRequest request) 
     {
         log.info("Ricevuta richiesta per creare una nuova proposta di voto.");
         PropostaVotoResponse response = propostaVotoFacade.createProposta(request);
         return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
+    
+    @PatchMapping("/{id}")
+    public ResponseEntity<PropostaVotoResponse> updateProposta(@PathVariable Long id, @Valid @RequestBody PropostaVotoRequest request)
+    {
+        log.info("Ricevuta richiesta di aggiornamento per proposta ID: {}", id);
+        PropostaVotoResponse response = propostaVotoFacade.updateProposta(id, request);
+        return ResponseEntity.ok(response);
+    }
+    
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteProposta(@PathVariable Long id) 
+    {
+        log.warn("Ricevuta richiesta di eliminazione per proposta ID: {}", id);
+        propostaVotoFacade.deleteProposta(id);
+        return ResponseEntity.noContent().build();
+    }
 
 
-    @PostMapping("/voti")
+    @PostMapping("/voti") 
     public ResponseEntity<VotoUtenteResponse> voteForProposta(@Valid @RequestBody VotoUtenteRequest request) 
     {
         log.info("Ricevuta richiesta di voto per proposta ID: {} nel mese {}", 
@@ -38,8 +54,8 @@ public class PropostaVotoController
         VotoUtenteResponse response = propostaVotoFacade.voteForProposta(request);
         return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
-
-    @GetMapping("/proposte/mese/{meseVotazione}")
+    
+    @GetMapping("/mese/{meseVotazione}")
     public ResponseEntity<List<PropostaVotoResponse>> getProposteByMese(@PathVariable String meseVotazione) 
     {
         log.info("Richiesta proposte per il mese: {}", meseVotazione);
@@ -53,35 +69,19 @@ public class PropostaVotoController
         return ResponseEntity.ok(response);
     }
     
-    @GetMapping("/proposte/vincitore/{meseVotazione}")
+    @GetMapping("/vincitore/{meseVotazione}")
     public ResponseEntity<PropostaVotoResponse> getWinnerProposta(@PathVariable String meseVotazione) 
     {
         log.info("Richiesta vincitore per il mese: {}", meseVotazione);
-        try 
-        {
-            PropostaVotoResponse winner = propostaVotoFacade.getWinnerProposta(meseVotazione);
-            return ResponseEntity.ok(winner);
-        } 
-        catch (RuntimeException e) 
-        {
-            log.warn("Nessun vincitore trovato per il mese {}: {}", meseVotazione, e.getMessage());
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        }
+        PropostaVotoResponse winner = propostaVotoFacade.getWinnerProposta(meseVotazione);
+        return ResponseEntity.ok(winner);
     }
     
-    @GetMapping("/proposte/{id}")
+    @GetMapping("/{id}")
     public ResponseEntity<PropostaVotoResponse> findById(@PathVariable Long id) 
     {
         log.info("Richiesta proposta con ID: {}", id);
-        try 
-        {
-            PropostaVotoResponse proposta = propostaVotoFacade.findById(id);
-            return ResponseEntity.ok(proposta);
-        } 
-        catch (RuntimeException e)
-        {
-            log.warn("Proposta non trovata con ID {}: {}", id, e.getMessage());
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        }
+        PropostaVotoResponse proposta = propostaVotoFacade.findById(id);
+        return ResponseEntity.ok(proposta);
     }
 }

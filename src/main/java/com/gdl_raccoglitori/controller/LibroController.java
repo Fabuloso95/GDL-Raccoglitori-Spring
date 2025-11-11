@@ -3,9 +3,11 @@ package com.gdl_raccoglitori.controller;
 import java.util.List;
 import org.springframework.http.*;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 import jakarta.validation.Valid;
 import com.gdl_raccoglitori.dto.request.LibroRequest;
 import com.gdl_raccoglitori.dto.response.LibroResponse;
+import com.gdl_raccoglitori.exceptionhandler.exception.TitoloDuplicatoException;
 import com.gdl_raccoglitori.facade.LibroFacade;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -68,5 +70,12 @@ public class LibroController
         log.warn("Controller: Richiesta eliminazione libro ID: {}", id);
         libroFacade.eliminaLibro(id);
         return ResponseEntity.noContent().build();
+    }
+    
+    @ExceptionHandler(TitoloDuplicatoException.class)
+    public ResponseEntity<String> handleTitoloDuplicato(TitoloDuplicatoException ex) 
+    {
+        log.warn("Conflitto rilevato (409): {}", ex.getMessage());
+        throw new ResponseStatusException(HttpStatus.CONFLICT, ex.getMessage());
     }
 }

@@ -6,7 +6,7 @@ import lombok.*;
 @Builder
 public class LibroResponse
 {
-	private Long Id;
+	private Long id;
 	private String titolo;
 	private String autore;
 	private String copertinaUrl;

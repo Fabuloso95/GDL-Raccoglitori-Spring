@@ -9,7 +9,7 @@ import com.gdl_raccoglitori.service.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
-import java.time.YearMonth;
+import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -22,7 +22,6 @@ public class PropostaVotoFacadeImpl implements PropostaVotoFacade
     private final PropostaVotoMapper propostaVotoMapper;
     private final VotoUtenteMapper votoUtenteMapper;
     private final UtenteService utenteService; 
-    private static final String DATE_FORMAT = "yyyy-MM";
 
     @Override
     public PropostaVotoResponse createProposta(PropostaVotoRequest request) 
@@ -33,6 +32,7 @@ public class PropostaVotoFacadeImpl implements PropostaVotoFacade
     }
 
     @Override
+    @Transactional
     public VotoUtenteResponse voteForProposta(VotoUtenteRequest request) 
     {
         Utente utente = utenteService.getCurrentAuthenticatedUser(); 
@@ -48,13 +48,32 @@ public class PropostaVotoFacadeImpl implements PropostaVotoFacade
         
         return votoUtenteMapper.toResponse(voto);
     }
+    
+    @Override
+    @Transactional
+    public PropostaVotoResponse updateProposta(Long id, PropostaVotoRequest request) 
+    {
+        Utente utenteCorrente = utenteService.getCurrentAuthenticatedUser(); 
+        
+        PropostaVoto propostaAggiornata = propostaVotoService.updateProposta(id, request, utenteCorrente);
+        
+        log.info("Facade: Proposta ID {} aggiornata da utente ID {}", id, utenteCorrente.getId());
+        return propostaVotoMapper.toResponse(propostaAggiornata);
+    }
+    
+    @Override
+    @Transactional
+    public void deleteProposta(Long id) 
+    {
+        propostaVotoService.deleteProposta(id);
+        log.warn("Facade: Proposta ID {} eliminata.", id);
+    }
 
     @Override
+    @Transactional(readOnly = true)
     public List<PropostaVotoResponse> getProposteByMese(String meseVotazione) 
     {
-        YearMonth mese = propostaVotoMapper.stringToYearMonth(meseVotazione);
-
-        List<PropostaVoto> proposte = propostaVotoService.findByMeseVotazione(mese);
+        List<PropostaVoto> proposte = propostaVotoService.findByMeseVotazione(meseVotazione);
 
         return proposte.stream()
                 .map(propostaVotoMapper::toResponse)
@@ -62,16 +81,16 @@ public class PropostaVotoFacadeImpl implements PropostaVotoFacade
     }
 
     @Override
+    @Transactional(readOnly = true)
     public PropostaVotoResponse getWinnerProposta(String meseVotazione) 
     {
-        YearMonth mese = propostaVotoMapper.stringToYearMonth(meseVotazione);
-        
-        PropostaVoto winner = propostaVotoService.findWinnerProposta(mese);
+        PropostaVoto winner = propostaVotoService.findWinnerProposta(meseVotazione);
         
         return propostaVotoMapper.toResponse(winner);
     }
     
     @Override
+    @Transactional(readOnly = true)
     public PropostaVotoResponse findById(Long id) 
     {
         PropostaVoto proposta = propostaVotoService.findById(id);

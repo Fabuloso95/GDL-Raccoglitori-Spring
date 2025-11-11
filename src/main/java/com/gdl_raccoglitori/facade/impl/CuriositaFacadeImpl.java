@@ -4,14 +4,17 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
+
 import com.gdl_raccoglitori.dto.request.CuriositaRequest;
 import com.gdl_raccoglitori.dto.response.CuriositaResponse;
 import com.gdl_raccoglitori.exceptionhandler.exception.OperazioneNonAutorizzataException;
 import com.gdl_raccoglitori.facade.CuriositaFacade;
 import com.gdl_raccoglitori.mapper.CuriositaMapper;
 import com.gdl_raccoglitori.model.*;
-import com.gdl_raccoglitori.service.CuriositaService;
+import com.gdl_raccoglitori.service.*;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -22,19 +25,61 @@ public class CuriositaFacadeImpl implements CuriositaFacade
 {
     private final CuriositaService curiositaService;
     private final CuriositaMapper curiositaMapper;
+    private final UtenteService utenteService; 
 
     private Utente getCurrentAuthenticatedUser() 
     {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-
-        if (authentication == null || !authentication.isAuthenticated() || 
-            authentication.getPrincipal() == null || !(authentication.getPrincipal() instanceof Utente)) 
+        
+        if (authentication == null || !authentication.isAuthenticated() || authentication.getPrincipal() == null) 
         {
-            log.error("Tentativo di accesso non autorizzato a un'operazione sulle curiosità. Nessun utente Utente trovato nel contesto.");
-            throw new OperazioneNonAutorizzataException("Utente non autenticato o il Principal non è un oggetto Utente valido.");
+            log.error("Tentativo di accesso non autorizzato: Contesto di sicurezza vuoto o non autenticato.");
+            throw new OperazioneNonAutorizzataException("Utente non autenticato o il Principal non è valido.");
         }
         
-        return (Utente) authentication.getPrincipal(); 
+        Object principal = authentication.getPrincipal();
+        String tempUsername = null; 
+        
+        if (principal instanceof Utente) 
+        {
+            log.debug("Utente recuperato direttamente come Utente completo.");
+            return (Utente) principal;
+            
+        } 
+        else if 
+        (principal instanceof UserDetails)
+{
+            tempUsername = ((UserDetails) principal).getUsername();
+            
+        } 
+        else if (principal instanceof String) 
+        {
+            tempUsername = (String) principal;
+        }
+
+        final String username = tempUsername;
+
+        if (username != null)
+        {
+            try 
+            {
+                log.debug("Caricamento Utente dal servizio per username: {}", username);
+                return utenteService.findByUsername(username)
+                    .orElseThrow(() -> new OperazioneNonAutorizzataException("Utente autenticato non trovato nel database: " + username));
+            } 
+            catch (OperazioneNonAutorizzataException e) 
+            {
+                 throw e;
+            }
+            catch (Exception e)
+            {
+                log.error("Impossibile trovare Utente con username {}: {}", username, e.getMessage());
+                throw new OperazioneNonAutorizzataException("Errore nel recupero dell'utente dal database.");
+            }
+        }
+        
+        log.error("Tentativo di accesso non autorizzato: Tipo di Principal sconosciuto: {}", principal.getClass().getName());
+        throw new OperazioneNonAutorizzataException("Tipo di Principal non gestito nel contesto di sicurezza.");
     }
 
     @Override

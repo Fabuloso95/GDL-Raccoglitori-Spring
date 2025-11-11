@@ -7,8 +7,10 @@ import com.gdl_raccoglitori.service.VotoUtenteService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import java.time.YearMonth;
-import java.util.Optional;
+import java.time.format.*;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -16,7 +18,7 @@ import java.util.Optional;
 public class VotoUtenteServiceImpl implements VotoUtenteService 
 {
     private final VotoUtenteRepository votoUtenteRepository;
-
+    
     @Override
     public VotoUtente findById(Long id)
     {
@@ -26,9 +28,30 @@ public class VotoUtenteServiceImpl implements VotoUtenteService
     }
 
     @Override
-    public Optional<VotoUtente> findByUtenteAndMeseVotazione(Utente utente, YearMonth meseVotazione)
+    @Transactional(readOnly = true)
+    public List<VotoUtente> findByUtenteAndMeseVotazione(Utente utente, String meseVotazione) 
     {
-        log.debug("Ricerca VotoUtente per utente ID {} e mese {}", utente.getId(), meseVotazione);
-        return votoUtenteRepository.findByUtenteAndMeseVotazione(utente, meseVotazione);
+        String cleanedMeseVotazione = meseVotazione.replaceAll("[^0-9-]", "").trim();
+
+        if (cleanedMeseVotazione.isEmpty() || cleanedMeseVotazione.length() != 7) {
+             log.error("Stringa meseVotazione pulita non valida o incompleta: '{}'", cleanedMeseVotazione);
+             throw new IllegalArgumentException("Formato data non valido: utilizzare YYYY-MM. Esempio: 2025-11");
+        }
+        
+        try 
+        {
+            YearMonth.parse(cleanedMeseVotazione, DateTimeFormatter.ofPattern("yyyy-MM"));
+            log.debug("Mese votazione correttamente parsato: {}", cleanedMeseVotazione);
+        } 
+        catch (DateTimeParseException e) 
+        {
+            log.error("Errore di parsing del meseVotazione: {}. Richiesto formato YYYY-MM.", cleanedMeseVotazione, e);
+            throw new IllegalArgumentException("Formato data non valido: utilizzare YYYY-MM. Esempio: 2025-11", e);
+        }
+
+        log.info("Verifica voti esistenti per utente ID {} (nome: {}) nel mese {}", 
+                 utente.getId(), utente.getNome(), cleanedMeseVotazione);
+                 
+        return votoUtenteRepository.findByUtenteAndMeseVotazione(utente, cleanedMeseVotazione); 
     }
 }

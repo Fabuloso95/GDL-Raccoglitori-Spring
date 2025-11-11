@@ -11,7 +11,7 @@ public interface LibroMapper
 	LibroResponse toResponse(Libro libro);
 	
 	@Mapping(target = "id", ignore = true)
-	@Mapping(target = "letto", ignore = true)
+	@Mapping(target = "letto", constant = "false")
 	@Mapping(target = "proposteVoto", ignore = true)
 	@Mapping(target = "lettureCorrenti", ignore = true)
 	@Mapping(target = "curiosita", ignore = true)

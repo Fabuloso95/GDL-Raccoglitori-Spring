@@ -6,6 +6,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import com.gdl_raccoglitori.dto.request.LibroRequest;
 import com.gdl_raccoglitori.dto.response.LibroResponse;
+import com.gdl_raccoglitori.exceptionhandler.exception.TitoloDuplicatoException;
 import com.gdl_raccoglitori.mapper.LibroMapper;
 import com.gdl_raccoglitori.model.Libro;
 import com.gdl_raccoglitori.repository.LibroRepository;
@@ -24,7 +25,7 @@ public class LibroServiceImpl implements LibroService
     private Libro findLibroById(Long id) 
     {
         return libroRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Libro non trovato con ID: " + id));
+                .orElseThrow(() -> new RuntimeException("Libro non trovato con ID: " + id)); 
     }
 
     @Override
@@ -35,7 +36,7 @@ public class LibroServiceImpl implements LibroService
 
         if (libroRepository.existsByTitolo(request.getTitolo())) 
         {
-            throw new RuntimeException("Esiste già un libro con il titolo: " + request.getTitolo());
+            throw new TitoloDuplicatoException(request.getTitolo());
         }
 
         Libro nuovoLibro = libroMapper.toEntity(request);
@@ -74,7 +75,7 @@ public class LibroServiceImpl implements LibroService
 
         if (!libroEsistente.getTitolo().equals(request.getTitolo()) && libroRepository.existsByTitolo(request.getTitolo()))
         {
-             throw new RuntimeException("Impossibile aggiornare: esiste già un altro libro con il titolo: " + request.getTitolo());
+             throw new TitoloDuplicatoException(request.getTitolo());
         }
 
         libroMapper.updateLibroFromRequest(request, libroEsistente);

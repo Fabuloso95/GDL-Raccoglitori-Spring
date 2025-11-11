@@ -1,6 +1,5 @@
 package com.gdl_raccoglitori.model;
 
-import java.time.YearMonth;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -25,5 +24,5 @@ public class VotoUtente
 	private PropostaVoto propostaVoto;
 	
 	@Column(name = "mese_votazione", columnDefinition = "TEXT")
-	private YearMonth meseVotazione;
+	private String meseVotazione;
 }

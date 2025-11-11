@@ -9,7 +9,7 @@ public class PropostaVotoResponse
 {
 	private Long id;
 	private LibroResponse libroProposto; 
-	private YearMonth meseVotazione;
+	private String meseVotazione;
 	private LocalDateTime dataCreazione;
 	private Integer numVoti;
 }

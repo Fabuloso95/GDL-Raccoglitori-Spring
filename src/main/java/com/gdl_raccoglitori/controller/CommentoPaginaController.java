@@ -1,10 +1,10 @@
 package com.gdl_raccoglitori.controller;
 
 import com.gdl_raccoglitori.dto.request.CommentoPaginaRequest;
+import com.gdl_raccoglitori.dto.request.UpdateContenutoRequest;
 import com.gdl_raccoglitori.dto.response.CommentoPaginaResponse;
 import com.gdl_raccoglitori.facade.CommentoPaginaFacade;
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.NotBlank;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.*;
@@ -57,10 +57,10 @@ public class CommentoPaginaController
     @PatchMapping("/{id}/contenuto")
     public ResponseEntity<CommentoPaginaResponse> updateCommentoContenuto(
             @PathVariable Long id, 
-            @RequestParam @NotBlank(message = "Il contenuto non può essere vuoto") String nuovoContenuto) 
+            @Valid @RequestBody UpdateContenutoRequest request)
     {
         log.info("Controller: Ricevuta richiesta di aggiornamento contenuto per commento ID: {}", id);
-        CommentoPaginaResponse response = commentoPaginaFacade.updateCommento(id, nuovoContenuto);
+        CommentoPaginaResponse response = commentoPaginaFacade.updateCommento(id, request.getNuovoContenuto());
         return ResponseEntity.ok(response);
     }
 

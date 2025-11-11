@@ -3,6 +3,7 @@ package com.gdl_raccoglitori.facade.impl;
 import java.util.List;
 import java.util.stream.Collectors;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 import com.gdl_raccoglitori.dto.request.FrasePreferitaRequest;
 import com.gdl_raccoglitori.dto.response.FrasePreferitaResponse;
 import com.gdl_raccoglitori.exceptionhandler.exception.OperazioneNonAutorizzataException;
@@ -67,6 +68,7 @@ public class FrasePreferitaFacadeImpl implements FrasePreferitaFacade
 	}
 
 	@Override
+	@Transactional(readOnly = true)
 	public List<FrasePreferitaResponse> findMyFrasi()
 	{
 		Utente utenteSalvatore = getCurrentAuthenticatedUser();
@@ -79,6 +81,7 @@ public class FrasePreferitaFacadeImpl implements FrasePreferitaFacade
 	}
 
 	@Override
+	@Transactional(readOnly = true)
 	public List<FrasePreferitaResponse> findByLibroId(Long libroId) 
 	{
 		log.debug("Recupero frasi preferite per il libro ID {}", libroId);

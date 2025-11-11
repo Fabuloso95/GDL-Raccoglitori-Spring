@@ -5,6 +5,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
+
 import com.gdl_raccoglitori.dto.request.CommentoPaginaRequest;
 import com.gdl_raccoglitori.dto.response.CommentoPaginaResponse;
 import com.gdl_raccoglitori.exceptionhandler.exception.OperazioneNonAutorizzataException;
@@ -49,6 +51,7 @@ public class CommentoPaginaFacadeImpl implements CommentoPaginaFacade
     }
 
     @Override
+    @Transactional
     public CommentoPaginaResponse updateCommento(Long commentoId, String nuovoContenuto) 
     {
         Utente richiedente = getCurrentAuthenticatedUser();
@@ -59,6 +62,7 @@ public class CommentoPaginaFacadeImpl implements CommentoPaginaFacade
     }
 
     @Override
+    @Transactional
     public void deleteCommento(Long commentoId) 
     {
         Utente richiedente = getCurrentAuthenticatedUser();
@@ -67,6 +71,7 @@ public class CommentoPaginaFacadeImpl implements CommentoPaginaFacade
     }
 
     @Override
+    @Transactional
     public CommentoPaginaResponse findById(Long id) 
     {
         CommentoPagina commento = commentoPaginaService.findById(id);
@@ -74,6 +79,7 @@ public class CommentoPaginaFacadeImpl implements CommentoPaginaFacade
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<CommentoPaginaResponse> findByLetturaAndPagina(Long letturaCorrenteId, Integer paginaRiferimento) 
     {
         List<CommentoPagina> commenti = commentoPaginaService.findByLetturaAndPagina(letturaCorrenteId, paginaRiferimento);
@@ -84,6 +90,7 @@ public class CommentoPaginaFacadeImpl implements CommentoPaginaFacade
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<CommentoPaginaResponse> findByAutoreId(Long utenteId) 
     {
         List<CommentoPagina> commenti = commentoPaginaService.findByAutoreId(utenteId);

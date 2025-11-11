@@ -5,8 +5,8 @@ import com.gdl_raccoglitori.exceptionhandler.exception.RisorsaNonTrovataExceptio
 import com.gdl_raccoglitori.facade.VotoUtenteFacade;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
+import java.util.List;
+import org.springframework.http.*;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -35,11 +35,11 @@ public class VotoUtenteController
     }
     
     @GetMapping("/check/mese/{meseVotazione}")
-    public ResponseEntity<VotoUtenteResponse> checkExistingVote(@PathVariable String meseVotazione) 
+    public ResponseEntity<List<VotoUtenteResponse>> checkExistingVote(@PathVariable String meseVotazione) 
     {
         log.info("Verifica voto esistente per l'utente autenticato nel mese: {}", meseVotazione);
         
-        VotoUtenteResponse existingVote = votoUtenteFacade.checkExistingVote(meseVotazione);
+        List<VotoUtenteResponse> existingVote = votoUtenteFacade.checkExistingVote(meseVotazione);
         
         if (existingVote == null)
         {

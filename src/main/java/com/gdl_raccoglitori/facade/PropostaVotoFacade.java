@@ -11,5 +11,6 @@ public interface PropostaVotoFacade
     List<PropostaVotoResponse> getProposteByMese(String meseVotazione);
     PropostaVotoResponse getWinnerProposta(String meseVotazione);
     PropostaVotoResponse findById(Long id);
-
+    PropostaVotoResponse updateProposta(Long id, PropostaVotoRequest request);
+    void deleteProposta(Long id);
 }

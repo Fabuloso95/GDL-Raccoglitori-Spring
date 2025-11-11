@@ -13,6 +13,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -53,6 +54,7 @@ public class MessaggioChatFacadeImpl implements MessaggioChatFacade
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<MessaggioChatResponse> getGroupChatHistory(UUID gruppoID) 
     {
         log.debug("Recupero cronologia chat per Gruppo ID {}", gruppoID);
@@ -65,6 +67,7 @@ public class MessaggioChatFacadeImpl implements MessaggioChatFacade
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<MessaggioChatResponse> getPrivateChatHistory(Long altroUtenteId) 
     {
         Utente utenteA = getCurrentAuthenticatedUser();

@@ -1,16 +1,14 @@
 package com.gdl_raccoglitori.service.impl;
 
-import com.gdl_raccoglitori.dto.request.LetturaCorrenteRequest;
-import com.gdl_raccoglitori.dto.request.LetturaCorrenteUpdateRequest;
-import com.gdl_raccoglitori.exceptionhandler.exception.ConflittoDatiException;
-import com.gdl_raccoglitori.exceptionhandler.exception.OperazioneNonAutorizzataException;
-import com.gdl_raccoglitori.exceptionhandler.exception.RisorsaNonTrovataException;
+import com.gdl_raccoglitori.dto.request.*;
+import com.gdl_raccoglitori.exceptionhandler.exception.*;
 import com.gdl_raccoglitori.model.*;
 import com.gdl_raccoglitori.repository.*;
 import com.gdl_raccoglitori.service.LetturaCorrenteService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDate;
 import java.util.List;
 
@@ -33,6 +31,7 @@ public class LetturaCorrenteServiceImpl implements LetturaCorrenteService
     }
 
     @Override
+    @Transactional
     public LetturaCorrente startNewReading(LetturaCorrenteRequest request, Utente utente) 
     {
         Libro libro = libroRepository.findById(request.getLibroId())
@@ -57,9 +56,10 @@ public class LetturaCorrenteServiceImpl implements LetturaCorrenteService
     }
 
     @Override
+    @Transactional
     public LetturaCorrente updateReadingProgress(Long letturaId, LetturaCorrenteUpdateRequest request, Utente utenteRichiedente) 
     {
-        LetturaCorrente lettura = findById(letturaId);
+        LetturaCorrente lettura = findById(letturaId); 
         checkAuthorization(lettura, utenteRichiedente, "aggiornare");
 
         if (lettura.getDataCompletamento() != null)
@@ -80,6 +80,7 @@ public class LetturaCorrenteServiceImpl implements LetturaCorrenteService
     }
 
     @Override
+    @Transactional
     public LetturaCorrente completeReading(Long letturaId, Utente utenteRichiedente) 
     {
         LetturaCorrente lettura = findById(letturaId);
@@ -97,6 +98,7 @@ public class LetturaCorrenteServiceImpl implements LetturaCorrenteService
     }
 
     @Override
+    @Transactional
     public void deleteReading(Long letturaId, Utente utenteRichiedente) 
     {
         LetturaCorrente lettura = findById(letturaId);
@@ -107,19 +109,23 @@ public class LetturaCorrenteServiceImpl implements LetturaCorrenteService
     }
 
     @Override
+    @Transactional(readOnly = true) 
     public LetturaCorrente findById(Long id) 
     {
-        return letturaCorrenteRepository.findById(id)
+        return letturaCorrenteRepository.findByIdWithEagerCollections(id)
                 .orElseThrow(() -> new RisorsaNonTrovataException("Lettura Corrente con ID " + id + " non trovata."));
     }
 
     @Override
+    @Transactional(readOnly = true) 
     public List<LetturaCorrente> findByUtente(Utente utente) 
     {
-        return letturaCorrenteRepository.findByUtente(utente);
+        log.debug("Recupero letture per utente ID {} con caricamento eager delle collezioni.", utente.getId());
+        return letturaCorrenteRepository.findByUtenteWithEagerCollections(utente);
     }
 
-    @Override
+    @Override   
+    @Transactional(readOnly = true) 
     public List<Object[]> findUsersProgressByLibroId(Long libroId) 
     {
         if (!libroRepository.existsById(libroId))
