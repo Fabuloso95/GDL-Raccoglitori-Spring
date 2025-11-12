@@ -73,10 +73,32 @@ public class ImpostazioniServiceImpl implements ImpostazioniService
     {
         log.info("Aggiornamento impostazioni per utente ID: {}", utenteId);
         
-        Impostazioni impostazioni = impostazioniRepository.findByUtenteId(utenteId)
-                .orElseThrow(() -> new RuntimeException("Impostazioni non trovate per utente ID: " + utenteId));
+        Optional<Impostazioni> impostazioniOpt = impostazioniRepository.findByUtenteId(utenteId);
         
-        // Aggiorna solo i campi forniti (patch-style)
+        Impostazioni impostazioni;
+        
+        if (impostazioniOpt.isPresent()) 
+        {
+            impostazioni = impostazioniOpt.get();
+            log.info("Trovate impostazioni esistenti per utente ID: {}, procedo con aggiornamento", utenteId);
+        } 
+        else 
+        {
+            log.info("Impostazioni non trovate per utente ID: {}, creazione nuove impostazioni", utenteId);
+            Utente utente = utenteRepository.findById(utenteId)
+                    .orElseThrow(() -> new RuntimeException("Utente non trovato con ID: " + utenteId));
+            
+            impostazioni = Impostazioni.builder()
+                    .utente(utente)
+                    .notificheEmail(true)
+                    .notifichePush(true)
+                    .lingua("it")
+                    .tema("system")
+                    .emailRiassuntoSettimanale(false)
+                    .privacyProfiloPubblico(true)
+                    .build();
+        }
+
         if (request.getNotificheEmail() != null) 
         {
             impostazioni.setNotificheEmail(request.getNotificheEmail());

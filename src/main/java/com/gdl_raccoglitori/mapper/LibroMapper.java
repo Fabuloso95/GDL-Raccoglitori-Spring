@@ -8,6 +8,9 @@ import com.gdl_raccoglitori.model.Libro;
 @Mapper(componentModel = "spring", unmappedTargetPolicy = ReportingPolicy.IGNORE)
 public interface LibroMapper
 {
+	@Mapping(source = "annoPubblicazione", target = "annoPubblicazione")
+    @Mapping(source = "numeroPagine", target = "numeroPagine") 
+    @Mapping(source = "letto", target = "letto")
 	LibroResponse toResponse(Libro libro);
 	
 	@Mapping(target = "id", ignore = true)
