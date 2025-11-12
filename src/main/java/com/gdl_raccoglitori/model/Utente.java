@@ -5,6 +5,9 @@ import java.util.*;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
 import lombok.*;
@@ -13,8 +16,11 @@ import lombok.*;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-@ToString
-@EqualsAndHashCode
+@ToString(exclude= {
+		"messaggiInviati", "messaggiRicevuti", "lettureCorrenti", 
+	    "votiUtente", "commentiPagina", "curiositaCreate", "frasiPreferite"
+})
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
 @Builder
 public class Utente implements UserDetails
 {
@@ -78,12 +84,15 @@ public class Utente implements UserDetails
     private Set<MessaggioChat> messaggiRicevuti;
     
     @OneToMany(mappedBy = "utente", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonIgnore
     private Set<LetturaCorrente> lettureCorrenti;
 
     @OneToMany(mappedBy = "utente", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonIgnore
     private Set<VotoUtente> votiUtente;
 
     @OneToMany(mappedBy = "utente", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonIgnore
     private Set<CommentoPagina> commentiPagina;
     
     @OneToMany(mappedBy = "utenteCreatore", cascade = CascadeType.ALL, orphanRemoval = true)

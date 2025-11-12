@@ -10,6 +10,9 @@ public interface LetturaCorrenteMapper
 {
 	@Mapping(source = "libro.id", target = "libroId")
 	@Mapping(source = "utente.id", target = "utenteId")
+	@Mapping(source = "libro.titolo", target = "titoloLibro")
+	@Mapping(source = "libro.autore", target = "autoreLibro")
+	@Mapping(source = "libro.numeroPagine", target = "numeroPagineTotali")
 	LetturaCorrenteResponse toResponse(LetturaCorrente letturaCorrente);
 	
 	@Mapping(target = "id", ignore = true)

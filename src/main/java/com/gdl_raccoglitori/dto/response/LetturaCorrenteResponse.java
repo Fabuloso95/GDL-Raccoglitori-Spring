@@ -16,4 +16,7 @@ public class LetturaCorrenteResponse
 	private LocalDate dataCompletamento;
 	private Boolean partecipaChiamataZoom;
 	private List<CommentoPaginaResponse> commentiPagina;
+	private String titoloLibro;
+    private String autoreLibro;
+    private Integer numeroPagineTotali;
 }

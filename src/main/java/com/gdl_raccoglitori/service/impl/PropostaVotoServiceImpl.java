@@ -96,9 +96,23 @@ public class PropostaVotoServiceImpl implements PropostaVotoService
     @Override
     public PropostaVoto findWinnerProposta(String meseVotazione) 
     {
-        log.debug("Ricerca proposta vincente per il mese {}", meseVotazione);
+        log.debug("Ricerca proposta vincente per il mese: '{}'", meseVotazione);
+        
+        List<PropostaVoto> tutteProposte = propostaVotoRepository.findByMeseVotazione(meseVotazione);
+        log.debug("Trovate {} proposte per il mese: {}", tutteProposte.size(), meseVotazione);
+        
+        for (PropostaVoto proposta : tutteProposte) 
+        {
+            log.debug("Proposta ID: {}, Libro: {}, Voti: {}, Mese: {}", 
+                     proposta.getId(), 
+                     proposta.getLibroProposto().getId(),
+                     proposta.getNumVoti(),
+                     proposta.getMeseVotazione());
+        }
         
         PropostaVoto winner = propostaVotoRepository.findTopPropostaByMeseVotazione(meseVotazione);
+        
+        log.debug("Vincitore trovato: {}", winner != null ? "ID " + winner.getId() : "NULL");
         
         if (winner == null)
         {
