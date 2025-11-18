@@ -6,8 +6,6 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
-
 import com.gdl_raccoglitori.dto.request.CuriositaRequest;
 import com.gdl_raccoglitori.dto.response.CuriositaResponse;
 import com.gdl_raccoglitori.exceptionhandler.exception.OperazioneNonAutorizzataException;
