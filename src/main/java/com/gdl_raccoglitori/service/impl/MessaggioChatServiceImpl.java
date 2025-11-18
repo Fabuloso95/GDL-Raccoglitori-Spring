@@ -58,7 +58,7 @@ public class MessaggioChatServiceImpl implements MessaggioChatService
     }
 
     @Override
-    public List<MessaggioChat> findGroupChatMessages(UUID gruppoID) 
+    public List<MessaggioChat> findGroupChatMessages(String gruppoID) 
     {
         return messaggioChatRepository.findByGruppoIDOrderByDataInvioAsc(gruppoID);
     }

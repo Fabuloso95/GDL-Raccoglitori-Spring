@@ -1,15 +1,14 @@
 package com.gdl_raccoglitori.dto.request;
 
-import java.util.UUID;
 import jakarta.validation.constraints.*;
 import lombok.*;
 
-@Data
 @Builder
+@Data
 public class MessaggioChatRequest
 {
     @NotNull(message = "L'ID del gruppo/chat è obbligatorio")
-    private UUID gruppoID; 
+    private String gruppoID; 
     
     // Tipo di chat (es. "PRIVATA", "GRUPPO")
     @NotBlank(message = "Il tipo di chat è obbligatorio")

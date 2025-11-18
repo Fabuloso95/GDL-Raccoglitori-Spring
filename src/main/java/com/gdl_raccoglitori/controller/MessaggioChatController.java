@@ -27,11 +27,11 @@ public class MessaggioChatController
         return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
 
-    @GetMapping("/gruppo/{gruppoID}")
-    public ResponseEntity<List<MessaggioChatResponse>> getGroupChatHistory(@PathVariable UUID gruppoID) 
+    @GetMapping("/gruppo/{gruppoNome}")
+    public ResponseEntity<List<MessaggioChatResponse>> getGroupChatHistory(@PathVariable String gruppoNome) 
     {
-        log.debug("Controller: Richiesta cronologia chat per Gruppo ID: {}", gruppoID);
-        List<MessaggioChatResponse> messaggiList = messaggioChatFacade.getGroupChatHistory(gruppoID);
+        log.debug("Controller: Richiesta cronologia chat per Gruppo Nome: {}", gruppoNome);
+        List<MessaggioChatResponse> messaggiList = messaggioChatFacade.getGroupChatHistoryByNome(gruppoNome);
         return ResponseEntity.ok(messaggiList);
     }
 

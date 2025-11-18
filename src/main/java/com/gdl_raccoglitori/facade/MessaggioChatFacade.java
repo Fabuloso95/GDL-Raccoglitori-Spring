@@ -7,7 +7,7 @@ import com.gdl_raccoglitori.dto.response.*;
 public interface MessaggioChatFacade 
 {
     MessaggioChatResponse sendMessage(MessaggioChatRequest request);
-    List<MessaggioChatResponse> getGroupChatHistory(UUID gruppoID);
+    List<MessaggioChatResponse> getGroupChatHistoryByNome(String gruppoID);
     List<MessaggioChatResponse> getPrivateChatHistory(Long altroUtenteId);
     void deleteMessage(Long messaggioId);
 }

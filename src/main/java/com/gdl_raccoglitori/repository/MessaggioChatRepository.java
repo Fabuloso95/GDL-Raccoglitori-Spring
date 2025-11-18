@@ -8,7 +8,7 @@ public interface MessaggioChatRepository extends JpaRepository<MessaggioChat, Lo
 {
 	Optional<MessaggioChat> findById(Long id);
 	
-	List<MessaggioChat> findByGruppoIDOrderByDataInvioAsc(UUID gruppoID);
+	List<MessaggioChat> findByGruppoIDOrderByDataInvioAsc(String gruppoID);
     
     @Query("SELECT m FROM MessaggioChat m " +
             "WHERE (m.mittente = :utenteA AND m.destinatario = :utenteB) " +

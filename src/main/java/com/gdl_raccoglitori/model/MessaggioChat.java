@@ -1,7 +1,6 @@
 package com.gdl_raccoglitori.model;
 
 import java.time.LocalDateTime;
-import java.util.UUID;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
 import lombok.*;
@@ -28,7 +27,7 @@ public class MessaggioChat
 	private Utente destinatario;
 	
 	@Column(name = "gruppo_id")
-	private UUID gruppoID; // ID del gruppo (es. ID del Libro corrente o della chat privata)
+	private String gruppoID; // ID del gruppo (es. ID del Libro corrente o della chat privata)
 	
 	@Column(name = "tipo_chat", nullable = false)
 	private String tipoChat; // Esempio: "PRIVATA", "GRUPPO"

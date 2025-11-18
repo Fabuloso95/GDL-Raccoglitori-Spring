@@ -55,7 +55,7 @@ public class MessaggioChatFacadeImpl implements MessaggioChatFacade
 
     @Override
     @Transactional(readOnly = true)
-    public List<MessaggioChatResponse> getGroupChatHistory(UUID gruppoID) 
+    public List<MessaggioChatResponse> getGroupChatHistoryByNome(String gruppoID) 
     {
         log.debug("Recupero cronologia chat per Gruppo ID {}", gruppoID);
         
