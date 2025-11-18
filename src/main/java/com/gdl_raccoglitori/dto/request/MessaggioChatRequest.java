@@ -7,7 +7,6 @@ import lombok.*;
 @Data
 public class MessaggioChatRequest
 {
-    @NotNull(message = "L'ID del gruppo/chat è obbligatorio")
     private String gruppoID; 
     
     // Tipo di chat (es. "PRIVATA", "GRUPPO")
