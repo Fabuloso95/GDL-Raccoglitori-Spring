@@ -3,6 +3,7 @@ package com.gdl_raccoglitori.controller;
 import com.gdl_raccoglitori.dto.request.EventoRequestDTO;
 import com.gdl_raccoglitori.dto.response.EventoResponseDTO;
 import com.gdl_raccoglitori.facade.EventoFacade;
+import com.gdl_raccoglitori.security.CustomUserDetails;
 import lombok.RequiredArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
@@ -24,10 +25,37 @@ public class EventoController
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<EventoResponseDTO> creaEvento(
             @RequestBody EventoRequestDTO eventoRequestDTO,
-            @AuthenticationPrincipal String username) 
+            @AuthenticationPrincipal Object principal)
     {
+        String username = extractUsernameFromPrincipal(principal);
         EventoResponseDTO response = eventoFacade.creaEvento(eventoRequestDTO, username);
         return ResponseEntity.ok(response);
+    }
+
+    private String extractUsernameFromPrincipal(Object principal) 
+    {
+        if (principal instanceof CustomUserDetails) 
+        {
+            return ((CustomUserDetails) principal).getUsername();
+        } 
+        else if (principal instanceof org.springframework.security.oauth2.core.user.OAuth2User) 
+        {
+            org.springframework.security.oauth2.core.user.OAuth2User oauth2User = 
+                (org.springframework.security.oauth2.core.user.OAuth2User) principal;
+            return oauth2User.getAttribute("email");
+        } 
+        else if (principal instanceof org.springframework.security.core.userdetails.UserDetails) 
+        {
+            return ((org.springframework.security.core.userdetails.UserDetails) principal).getUsername();
+        } 
+        else if (principal instanceof String) 
+        {
+            return (String) principal;
+        } 
+        else 
+        {
+            throw new RuntimeException("Tipo di principal non supportato: " + principal.getClass().getName());
+        }
     }
     
     @GetMapping

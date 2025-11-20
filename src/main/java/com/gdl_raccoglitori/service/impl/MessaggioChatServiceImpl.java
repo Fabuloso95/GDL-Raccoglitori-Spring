@@ -18,6 +18,7 @@ public class MessaggioChatServiceImpl implements MessaggioChatService
 {
     private final MessaggioChatRepository messaggioChatRepository;
     private final UtenteRepository utenteRepository;
+    
     private static final String TIPO_CHAT_PRIVATA = "PRIVATA";
     private static final String TIPO_CHAT_GRUPPO = "GRUPPO";
 
@@ -27,7 +28,6 @@ public class MessaggioChatServiceImpl implements MessaggioChatService
         MessaggioChat messaggio = new MessaggioChat();
         messaggio.setMittente(mittente);
         messaggio.setContenuto(request.getContenuto());
-        messaggio.setGruppoID(request.getGruppoID());
         messaggio.setTipoChat(request.getTipoChat().toUpperCase());
         messaggio.setDataInvio(LocalDateTime.now());
 
@@ -42,12 +42,24 @@ public class MessaggioChatServiceImpl implements MessaggioChatService
                     .orElseThrow(() -> new RisorsaNonTrovataException("Destinatario con ID " + request.getDestinatarioId() + " non trovato."));
             
             messaggio.setDestinatario(destinatario);
+            
+            String gruppoId = generaGruppoIdPrivata(mittente.getId(), destinatario.getId());
+            messaggio.setGruppoID(gruppoId);
+            
             log.info("Messaggio privato inviato da {} a {}", mittente.getUsername(), destinatario.getUsername());
         } 
         else if (TIPO_CHAT_GRUPPO.equals(messaggio.getTipoChat()))
         {
             messaggio.setDestinatario(null);
-            log.info("Messaggio di gruppo inviato da {} al gruppo ID {}", mittente.getUsername(), request.getGruppoID());
+            
+            String gruppoId = request.getGruppoId();
+            if (gruppoId == null || gruppoId.trim().isEmpty()) 
+            {
+                gruppoId = "gruppo_generale";
+            }
+            messaggio.setGruppoID(gruppoId);
+            
+            log.info("Messaggio di gruppo inviato da {} al gruppo ID {}", mittente.getUsername(), gruppoId);
         }
         else
         {
@@ -55,6 +67,13 @@ public class MessaggioChatServiceImpl implements MessaggioChatService
         }
 
         return messaggioChatRepository.save(messaggio);
+    }
+
+    private String generaGruppoIdPrivata(Long utenteId1, Long utenteId2) 
+    {
+        Long minId = Math.min(utenteId1, utenteId2);
+        Long maxId = Math.max(utenteId1, utenteId2);
+        return "privata_" + minId + "_" + maxId;
     }
 
     @Override
@@ -66,7 +85,8 @@ public class MessaggioChatServiceImpl implements MessaggioChatService
     @Override
     public List<MessaggioChat> findPrivateChatMessages(Utente utenteA, Utente utenteB) 
     {
-        return messaggioChatRepository.findChatPrivataTra(utenteA, utenteB);
+        String gruppoId = generaGruppoIdPrivata(utenteA.getId(), utenteB.getId());
+        return messaggioChatRepository.findByGruppoIDOrderByDataInvioAsc(gruppoId);
     }
 
     @Override

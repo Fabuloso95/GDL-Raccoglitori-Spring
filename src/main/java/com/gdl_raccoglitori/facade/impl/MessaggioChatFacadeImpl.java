@@ -45,8 +45,8 @@ public class MessaggioChatFacadeImpl implements MessaggioChatFacade
     {
         Utente mittente = getCurrentAuthenticatedUser();
         
-        log.debug("Invio messaggio di tipo {} da Utente ID {} per Gruppo ID {}", 
-                  request.getTipoChat(), mittente.getId(), request.getGruppoID());
+        log.debug("Invio messaggio di tipo {} da Utente ID {} - Gruppo ID: {}, Destinatario ID: {}", 
+                  request.getTipoChat(), mittente.getId(), request.getGruppoId(), request.getDestinatarioId());
                   
         MessaggioChat messaggio = messaggioChatService.sendNewMessage(request, mittente);
         
